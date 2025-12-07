@@ -1,60 +1,58 @@
-/**
- * Normalizes each CSV row into a clean, typed JS object.
- * Matches EXACTLY the column names provided by the dataset.
- */
-export const normalizeSaleRow = (row) => {
-  const toNumber = (value) =>
-    value === "" || value === undefined || value === null ? null : Number(value);
+import fs from "fs";
+import https from "https";
+import csvParser from "csv-parser";
+import { normalizeSaleRow } from "../utils/normalize.js"; // keep your existing file
 
-  const toDate = (value) => (value ? new Date(value) : null);
+let salesData = [];
 
-  const normalizeTags = (value) =>
-    value
-      ? String(value)
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : [];
+// Download CSV from Google Drive
+function downloadCSV(url, destination) {
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(destination);
 
-  return {
-    // Identifiers
-    transactionId: row["Transaction ID"] || null,
+    https.get(url, (response) => {
+      response.pipe(file);
 
-    // Customer
-    date: toDate(row["Date"]),
-    customerId: row["Customer ID"] || null,
-    customerName: row["Customer Name"] || "",
-    phoneNumber: row["Phone Number"] || "",
-    gender: row["Gender"] || "",
-    age: toNumber(row["Age"]),
-    customerRegion: row["Customer Region"] || "",
-    customerType: row["Customer Type"] || "",
+      file.on("finish", () => {
+        file.close(() => resolve(destination));
+      });
 
-    // Product
-    productId: row["Product ID"] || null,
-    productName: row["Product Name"] || "",
-    brand: row["Brand"] || "",
-    productCategory: row["Product Category"] || "",
-    tags: normalizeTags(row["Tags"]),
+      file.on("error", reject);
+    });
+  });
+}
 
-    // Sales Info
-    quantity: toNumber(row["Quantity"]),
-    pricePerUnit: toNumber(row["Price per Unit"]),
-    discountPercentage: toNumber(row["Discount Percentage"]),
-    totalAmount: toNumber(row["Total Amount"]),
-    finalAmount: toNumber(row["Final Amount"]),
+export async function loadSalesData() {
+  try {
+    const csvUrl = process.env.CSV_URL;
+    if (!csvUrl) {
+      console.error("❌ CSV_URL is not defined in environment variables");
+      return;
+    }
 
-    // Payment / Order
-    paymentMethod: row["Payment Method"] || "",
-    orderStatus: row["Order Status"] || "",
-    deliveryType: row["Delivery Type"] || "",
+    const localPath = "./src/data/dataset.csv";
 
-    // Store info
-    storeId: row["Store ID"] || "",
-    storeLocation: row["Store Location"] || "",
+    console.log("📥 Downloading dataset from Google Drive...");
+    await downloadCSV(csvUrl, localPath);
 
-    // Salesperson
-    salespersonId: row["Salesperson ID"] || "",
-    employeeName: row["Employee Name"] || ""
-  };
-};
+    console.log("📊 Parsing CSV...");
+    const results = [];
+
+    await new Promise((resolve, reject) => {
+      fs.createReadStream(localPath)
+        .pipe(csvParser())
+        .on("data", (row) => results.push(normalizeSaleRow(row)))  // USE YOUR FUNCTION
+        .on("end", resolve)
+        .on("error", reject);
+    });
+
+    salesData = results;
+    console.log(`✅ Loaded ${results.length} rows from Google Drive CSV`);
+  } catch (err) {
+    console.error("❌ Error loading CSV:", err);
+  }
+}
+
+export function getSalesData() {
+  return salesData;
+}
