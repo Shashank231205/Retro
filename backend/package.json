@@ -1,0 +1,20 @@
+{
+  "name": "truestate-backend",
+  "version": "1.0.0",
+  "description": "Retail Sales Management System backend for TruEstate assignment",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "csv-parser": "^3.0.0",
+    "express": "^4.18.0",
+    "react-router-dom": "^7.10.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}

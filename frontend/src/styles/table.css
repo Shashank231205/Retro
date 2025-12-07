@@ -1,0 +1,45 @@
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  color: #e5e7eb;
+}
+
+.transactions-table thead {
+  background: rgba(30, 64, 175, 0.3);
+}
+
+.transactions-table th,
+.transactions-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(55, 65, 81, 0.9);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.transactions-table th {
+  font-weight: 600;
+  color: #cbd5f5;
+  font-size: 0.75rem;
+}
+
+.transactions-table tbody tr:nth-child(even) {
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.transactions-table tbody tr:hover {
+  background: rgba(129, 140, 248, 0.2);
+}
+
+.cell-main {
+  font-weight: 500;
+}
+
+.cell-sub {
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
